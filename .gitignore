@@ -3,3 +3,4 @@ logs/*
 .docker/mysql/data/*
 .docker/rabbitmq/data/*
 .docker/mongodb/data/*
+.docker/elasticsearch/data.*

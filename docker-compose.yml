@@ -1,6 +1,6 @@
 version: '3.3'
 
-# elasticsearch(+kibana,+logstash), supervisor
+# elasticsearch(+kibana,+logstash), supervisor, slow query log for mysql
 
 services:
 
@@ -61,10 +61,27 @@ services:
     networks:
       - internal
 
-# add slow query log to logs
+  elasticsearch:
+    image: elasticsearch:7.9.0
+    container_name: elasticsearch
+    environment:
+      - "cluster.name=docker-cluster"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./.docker/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - internal
+
   mysql:
     container_name: mysql
-    image: library/mysql:5.7.31
+    image: mysql:5.7.31
     working_dir: /var/www/app
     restart: always
     ports:
@@ -95,7 +112,7 @@ services:
 
   adminer:
     container_name: adminer
-    image: library/adminer
+    image: adminer
     restart: always
     ports:
       - 8080:8080
