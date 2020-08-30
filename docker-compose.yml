@@ -1,6 +1,6 @@
-version: '3.3'
+version: "3"
 
-# elasticsearch(+kibana,+logstash), supervisor, slow query log for mysql
+# add supervisor, redis, beanstalk, german
 
 services:
 
@@ -9,7 +9,7 @@ services:
     image: nginx:stable-alpine
     restart: always
     ports:
-      - 81:80
+      - 80:80
       - 443:443
     working_dir: /var/www/app
     volumes:
@@ -32,6 +32,7 @@ services:
       - .:/var/www/app
       - ./.docker/php-fpm/php-ini-overrides.ini:/usr/local/etc/php/conf.d/99-overrides.ini
       - ./.docker/php-fpm/php.ini:/usr/local/etc/php/php.ini
+      - ./.docker/php-fpm/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
     networks:
       - internal
 
@@ -58,24 +59,6 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    networks:
-      - internal
-
-  elasticsearch:
-    image: elasticsearch:7.9.0
-    container_name: elasticsearch
-    environment:
-      - "cluster.name=docker-cluster"
-      - "bootstrap.memory_lock=true"
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - ./.docker/elasticsearch/data:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
     networks:
       - internal
 
@@ -123,6 +106,30 @@ services:
       - ./.docker/adminer/adminer.css:/var/www/html/adminer.css
     networks:
       - internal
+
+  elasticsearch:
+    image: elasticsearch:7.9.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=example
+    volumes:
+      - ./.docker/elasticsearch/data:/usr/share/elasticsearch/data
+      - ./logs/elasticsearch:/var/log/elasticsearch
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  kibana:
+    image: kibana:7.9.0
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      - KIBANA_ELASTICSEARCH_URL=elasticsearch
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=example
 
 networks:
   internal:
