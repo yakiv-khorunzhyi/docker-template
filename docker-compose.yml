@@ -49,7 +49,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
     volumes:
-      - ./.docker/rabbitmq/etc:/etc/rabbitmq/
+      - ./.docker/rabbitmq:/etc/rabbitmq/
       - ./.docker/rabbitmq/data:/var/lib/rabbitmq/
       - ./logs/rabbitmq:/var/log/rabbitmq/log/
     environment:
