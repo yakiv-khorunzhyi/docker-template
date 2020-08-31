@@ -1,6 +1,6 @@
 version: "3"
 
-# add supervisor, redis, beanstalk, german
+# add supervisor, redis
 
 services:
 
